@@ -1,63 +1,56 @@
-#import asyncio
-#import csv
 import json
-#import sqlite3
+import sqlite3
+from datetime import datetime
 
-#import httpx
-#import m3u8
 import requests
-#import youtube_dl
 from bs4 import BeautifulSoup
 #from flask import Flask
+from yt_dlp import YoutubeDL
 
-def request(url: str) -> (BeautifulSoup, bool):
-    #r = await client.get(url)
+class Episode:
+    def __init__(self, name, description, thumbnail, upload_date, url):
+        self.name = name
+        self.description = description
+        self.thumbnail = thumbnail
+        self.upload_date = upload_date
+        self.url = url
+
+def request(url: str) -> BeautifulSoup:
     r: requests.Response = requests.get(url)
     soup: BeautifulSoup = BeautifulSoup(r.content, 'lxml')
-    return soup, r.status_code == 200
-
-def test():
-    r, status = request('https://www.npr.org/get/92071316/render/partial/next?start=0')
-    if not status:
-        print('error')
-    else:
-        print(r)
+    return soup
 
 def fetch_episode(url: str):
-    soup, status = request(url)
-    print('got episode')
-    j = json.loads(soup.find('script', {'type': 'application/ld+json'}).text)['subjectOf'][0]
+    soup = request(url)
+    j = soup.find('script', {'type': 'application/ld+json'}).text
+    episode = json.loads(j)['subjectOf'][0]
+    e = Episode(episode['name'],
+                episode['description'],
+                episode['thumbnailUrl'],
+                int(datetime.fromisoformat(episode['uploadDate']).timestamp()),
+                episode['embedUrl'])
+    print(f'{e.name}\n{e.description}\n{e.thumbnail}\n{e.upload_date}\n{e.url}\n')
 
-def fetch(url: str, page: int):
-    f = open('urls', 'a')
-    soup, status = request(url)
-    episodes = soup.find_all('article', class_=['item event-more-article', 'item event-more-article article-type-audio'])
+def fetch_episodes(url: str):
+    soup = request(url)
+    classes = ['item event-more-article', 'item event-more-article article-type-audio']
+    episodes = soup.find_all('article', class_=classes)
     for e in episodes:
         url = e.find('a').get('href')
-        f.write(f'{url}\n')
-    #    fetch_episode(e.find('a').get('href'))
-    f.close()
-    return episodes, status
-
-def print_titles(episodes):
-    for e in episodes:
-        print(e.find('h2', class_='title').text)
+        fetch_episode(url)
 
 def main() -> None:
-    #test()
     scraping: bool = True
     page: int = 0
     while scraping:
-        if page >= 1506:
+        r = requests.get(f'https://www.npr.org/get/92071316/remainingCount?start={page}')
+        remaining: int = int(r.text)
+        if remaining != 24:
+            scraping = False
             break
-        print(f'page: {page}')
         url: str = f'https://www.npr.org/get/92071316/render/partial/next?start={page}'
-        #async with httpx.AsyncClient() as client:
-        #    pass
-        episodes, status = fetch(url, page)
-        scraping = status
-        page += len(episodes)
-        print_titles(episodes)
+        fetch_episodes(url)
+        page += remaining
     print('all episode urls collected')
 
 if __name__ == '__main__':
