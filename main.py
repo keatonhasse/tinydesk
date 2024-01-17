@@ -14,31 +14,43 @@ def request(url: str) -> BeautifulSoup:
     return soup
 
 def fetch_episode(url: str) -> None:
+    print(f'fetching {url}')
     soup = request(url)
-    j = soup.find('script', {'type': 'application/ld+json'}).text
-    episode_data = json.loads(j)['subjectOf'][0]
-    timestamp = int(datetime.fromisoformat(episode_data['uploadDate']).timestamp())
-    episode = (
-        episode_data['name'],
-        episode_data['description'],
-        episode_data['thumbnailUrl'],
-        timestamp,
-        episode_data['embedUrl']
-    )
-    if not db.check_timestamp(timestamp):
-        db.insert(episode)
-    print(episode)
+    available = soup.find('p', class_='unvailable')
+    playlist = soup.find('ul', class_='playlist')
+    if available is None and playlist is None:
+        print('still fetching')
+        json_text = soup.find('script', {'type': 'application/ld+json'}).text
+        json_data = json.loads(json_text)
+        if 'subjectOf' in json_data:
+            episode_data = json_data['subjectOf'][0]
+            if 'embedUrl' in episode_data:
+                timestamp = int(datetime.fromisoformat(episode_data['uploadDate']).timestamp())
+                description = soup.find('meta', {'name': 'description'})['content']
+                description = description.replace('amp;', '')
+                episode = (
+                    url,
+                    episode_data['name'],
+                    timestamp,
+                    episode_data['thumbnailUrl'],
+                    episode_data['embedUrl'],
+                    description
+                )
+                db.insert(episode)
 
 def fetch_episodes(url: str) -> None:
+    print('fetch episodes')
     soup = request(url)
     classes = ['item event-more-article', 'item event-more-article article-type-audio']
     episodes = soup.find_all('article', class_=classes)
     for episode in episodes:
         url = episode.find('a')['href']
-        #fetch_episode(url)
+        if not db.check_url(url) and url not in skip_urls:
+            fetch_episode(url)
 
 def main() -> None:
-    page = 0
+    page = db.last_page()
+    print(page)
     while True:
         r = requests.get(f'https://www.npr.org/get/92071316/remainingCount?start={page}')
         remaining = int(r.text)
@@ -47,9 +59,16 @@ def main() -> None:
         url = f'https://www.npr.org/get/92071316/render/partial/next?start={page}'
         fetch_episodes(url)
         page += remaining
+        db.update_page(page)
     print('all episode urls collected')
 
 if __name__ == '__main__':
+    skip_urls = (
+        'https://www.npr.org/2014/10/04/353534954/ryan-keberle-catharsis-tiny-desk-concert',
+        'https://www.npr.org/2022/12/09/1140051996/eliane-elias-tiny-desk-concert',
+        'https://www.npr.org/series/761983313/tiny-desk-playlists',
+        'https://www.npr.org/music'
+    )
     db = Database()
     main()
     db.close()
