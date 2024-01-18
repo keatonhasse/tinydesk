@@ -14,9 +14,6 @@ def request(url: str) -> BeautifulSoup:
     soup = BeautifulSoup(r.content, 'lxml')
     return soup
 
-def og_content(soup, type: str):
-    return soup.find('meta', {'property', f'og:{type}'})['content']
-
 def fetch_episode(url: str) -> None:
     print(f'fetching {url}')
     soup = request(url)
