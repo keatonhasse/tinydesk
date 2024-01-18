@@ -17,11 +17,12 @@ def request(url: str) -> BeautifulSoup:
 
 def parse_episode(soup: BeautifulSoup) -> tuple[str, ...]:
     aria = soup.find('div', class_='speakable').find_all('b')
+    time = datetime.fromisoformat(soup.find('time')['datetime'])
     graphic_wrapper = soup.find('div', class_='graphicwrapper')
     jw_player = json.loads(graphic_wrapper.find_all('div')[1]['data-jwplayer'])
     return (
         aria[0].text,
-        int(datetime.fromisoformat(soup.find('time')['datetime']).timestamp()),
+        int(time.timestamp()),
         jw_player['image'],
         jw_player['sources'][0]['file'],
         aria[1].text
