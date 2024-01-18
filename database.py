@@ -16,7 +16,7 @@ class Database:
                 title TEXT NOT NULL,
                 upload_date TEXT NOT NULL,
                 thumbnail TEXT NOT NULL,
-                embed_url TEXT NOT NULL,
+                content_url TEXT NOT NULL,
                 description TEXT NOT NULL
             );
         ''')
