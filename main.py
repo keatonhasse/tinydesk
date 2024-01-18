@@ -1,6 +1,7 @@
 import json
 import re
 from datetime import datetime
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -39,13 +40,15 @@ def fetch_episode(url: str) -> None:
 
 def fetch_episodes(url: str) -> None:
     print('fetching episodes')
+    path_pattern = r'^\/\d{4}\/\d{2}\/\d{2}\/\d+\/[\a-z-]+$'
     soup = request(url)
-    classes = ['item event-more-article', 'item event-more-article article-type-audio']
+    classes = ['item event-more-article',
+               'item event-more-article article-type-audio']
     episodes = soup.find_all('article', class_=classes)
-    #for episode in set(episodes).difference(bad_urls):
     for episode in episodes:
         episode_url = episode.find('a')['href']
-        if not re.match('https:\/\/www.npr.org\/\d{4}\/\d{2}\/\d{2}\/\d{10}\/[\w-]+', episode_url):
+        path = urlparse(episode_url).path
+        if not re.match(path_pattern, path):
             continue
         if not db.contains(episode_url):
             fetch_episode(episode_url)
@@ -64,13 +67,6 @@ def main() -> None:
         page += remaining
 
 if __name__ == '__main__':
-    bad_urls = (
-        #'https://www.npr.org/2014/10/04/353534954/ryan-keberle-catharsis-tiny-desk-concert',
-        'https://www.npr.org/2022/12/09/1140051996/eliane-elias-tiny-desk-concert',
-        #'https://www.npr.org/2014/10/18/356901185/-sgeir-tiny-desk-concert',
-        #'https://www.npr.org/series/761983313/tiny-desk-playlists',
-        #'https://www.npr.org/music'
-    )
     db = Database()
     main()
     db.close()
