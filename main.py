@@ -15,27 +15,23 @@ def request(url: str) -> BeautifulSoup:
     soup = BeautifulSoup(r.content, 'lxml')
     return soup
 
+def parse_episode(soup: BeautifulSoup) -> tuple[str, ...]:
+    aria = soup.find('div', class_='speakable').find_all('b')
+    jwplayer = json.loads(soup.find('div', class_='graphicwrapper').find_all('div')[1]['data-jwplayer'])
+    return (
+        aria[0].text,
+        int(datetime.fromisoformat(soup.find('time')['datetime']).timestamp()),
+        jwplayer['image'],
+        jwplayer['sources'][0]['file'],
+        aria[1].text
+    )
+
 def fetch_episode(url: str) -> None:
     print(f'fetching {url}')
     soup = request(url)
     #available = soup.find('p', class_='unvailable')
     #if available is None:
-    aria = soup.find('div', class_='speakable').find_all('b')
-    title = aria[0].text
-    timestamp = int(datetime.fromisoformat(soup.find('time')['datetime']).timestamp())
-    jw_player = soup.find('div', class_='graphicwrapper')
-    jw_player_json = json.loads(jw_player.find_all('div')[1]['data-jwplayer'])
-    thumbnail = jw_player_json['image']
-    content_url = jw_player_json['sources'][0]['file']
-    description = aria[1].text
-    episode = (
-        url,
-        title,
-        timestamp,
-        thumbnail,
-        content_url,
-        description
-    )
+    episode = (url,) + parse_episode(soup)
     db.insert(episode)
 
 def fetch_episodes(url: str) -> None:
