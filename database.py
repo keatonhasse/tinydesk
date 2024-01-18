@@ -10,7 +10,7 @@ class Database:
 
     def create_tables(self) -> None:
         self.con.execute('''
-            CREATE TABLE IF NOT EXISTS episodes(
+            CREATE TABLE IF NOT EXISTS episodes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 url TEXT NOT NULL,
                 title TEXT NOT NULL,
@@ -18,25 +18,22 @@ class Database:
                 thumbnail TEXT NOT NULL,
                 embed_url TEXT NOT NULL,
                 description TEXT NOT NULL
-            )
+            );
         ''')
         self.con.commit()
 
     def insert(self, episode: tuple[str, ...]) -> None:
         self.con.execute('''
-                INSERT INTO episodes(
+            INSERT INTO episodes (
                 url,
                 title,
                 upload_date,
                 thumbnail,
                 embed_url,
                 description
-            ) VALUES(?, ?, ?, ?, ?, ?)''', episode
-        )
+            ) VALUES (?, ?, ?, ?, ?, ?);
+        ''', episode)
         self.con.commit()
-
-    def select(self):
-        pass
     
     def last_page(self) -> int:
         cur = self.con.cursor()
