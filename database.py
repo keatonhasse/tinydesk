@@ -29,7 +29,7 @@ class Database:
                 title,
                 upload_date,
                 thumbnail,
-                embed_url,
+                content_url,
                 description
             ) VALUES (?, ?, ?, ?, ?, ?);
         ''', episode)
