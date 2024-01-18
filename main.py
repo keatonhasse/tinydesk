@@ -19,7 +19,8 @@ def parse_episode(soup: BeautifulSoup) -> tuple[str, ...]:
     aria = soup.find('div', class_='speakable').find_all('b')
     time = datetime.fromisoformat(soup.find('time')['datetime'])
     graphic_wrapper = soup.find('div', class_='graphicwrapper')
-    jw_player = json.loads(graphic_wrapper.find_all('div')[1]['data-jwplayer'])
+    data = graphic_wrapper.find_all('div')[1]['data-jwplayer']
+    jw_player = json.loads(data)
     return (
         aria[0].text,
         int(time.timestamp()),
