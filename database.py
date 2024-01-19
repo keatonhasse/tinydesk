@@ -11,27 +11,18 @@ class Database:
     def create_tables(self) -> None:
         self.con.execute('''
             CREATE TABLE IF NOT EXISTS episodes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id TEXT PRIMARY KEY,
                 url TEXT NOT NULL,
                 title TEXT NOT NULL,
                 upload_date TEXT NOT NULL,
-                thumbnail TEXT NOT NULL,
-                content_url TEXT NOT NULL,
-                description TEXT NOT NULL
+                thumbnail TEXT NOT NULL
             );
         ''')
         self.con.commit()
 
     def insert(self, episode: tuple[str, ...]) -> None:
         self.con.execute('''
-            INSERT INTO episodes (
-                url,
-                title,
-                upload_date,
-                thumbnail,
-                content_url,
-                description
-            ) VALUES (?, ?, ?, ?, ?, ?);
+            INSERT INTO episodes VALUES (?, ?, ?, ?, ?);
         ''', episode)
         self.con.commit()
     
