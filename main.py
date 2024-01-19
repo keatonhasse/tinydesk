@@ -17,17 +17,18 @@ def request(url: str) -> BeautifulSoup:
     return soup
 
 def fetch_video_id(title: str) -> str:
-    video = YoutubeSearch(title, max_results=1).to_dict()
-    print(video[0]['id'])
+    video = YoutubeSearch(f'{title} Tiny Desk Concert', max_results=1).to_dict()
     return video[0]['id']
 
 def parse_episode(url: str, episode) -> tuple[str, ...]:
-    print(f'fetching {url}')
     url = episode.find('a')['href']
     title = episode.find('h2', class_='title').text
     time = episode.find('time')['datetime']
     timestamp = int(datetime.strptime(time, '%Y-%m-%d').timestamp())
-    thumbnail = re.search(r'[\w-]+\.(jpg|jpeg|png)', episode.find('img')['src']).group(0)
+    image = episode.find('img')
+    thumbnail = None
+    if image:
+        thumbnail = re.search(r'[\w-]+\.(jpg|jpeg|png)', image['src']).group(0)
     episode = (
         fetch_video_id(title),
         url,
@@ -55,7 +56,6 @@ def main() -> None:
     fetch_episodes(f'{base}/render/partial/next?start=0')
     page = db.last_page()
     while True:
-        print(f'fetching page {page}')
         params = f'start={page}'
         remaining = int(requests.get(f'{base}/remainingCount?{params}').text)
         if remaining != 24:
