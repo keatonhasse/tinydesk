@@ -15,7 +15,7 @@ class Database:
                 url TEXT NOT NULL,
                 title TEXT NOT NULL,
                 upload_date TEXT NOT NULL,
-                thumbnail TEXT NOT NULL
+                thumbnail TEXT
             );
         ''')
         self.con.commit()
