@@ -4,9 +4,7 @@ from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
-#from fastapi import FastAPI
 from youtube_search import YoutubeSearch
-#from yt_dlp import YoutubeDL
 
 from database import Database
 
@@ -43,7 +41,7 @@ def parse_episode(url: str, episode) -> tuple[str, ...]:
 def fetch_episodes(url: str) -> None:
     soup = request(url)
     classes = ['item event-more-article',
-               'item event-more-article article-type-audio']
+            'item event-more-article article-type-audio']
     episodes = soup.find_all('article', class_=classes)
     for episode in episodes:
         episode_url = episode.find('a')['href']
@@ -64,6 +62,7 @@ def main() -> None:
             break
         fetch_episodes(f'{base}/render/partial/next?{params}')
         page += remaining
+    db.close()
 
 if __name__ == '__main__':
     BAD_PATHS = (
