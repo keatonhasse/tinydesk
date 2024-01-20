@@ -17,8 +17,11 @@ def request(url: str) -> BeautifulSoup:
     return soup
 
 def fetch_video_id(title: str) -> str:
-    video = YoutubeSearch(f'{title} Tiny Desk Concert', max_results=1).to_dict()
-    return video[0]['id']
+    videos = YoutubeSearch(f'{title} Tiny Desk Concert', max_results=2).to_dict()
+    if videos[0]['channel'] == 'NPR Music' or videos[1]['channel'] == 'NPR Music':
+        if 'Home' in videos[0]['title'] and 'Home' in title:
+            return videos[0]['id']
+        return videos[1]['id']
 
 def parse_episode(url: str, episode) -> tuple[str, ...]:
     url = episode.find('a')['href']
