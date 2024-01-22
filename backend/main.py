@@ -11,7 +11,7 @@ def get_episodes():
     cur.execute('SELECT * FROM episodes LIMIT 5;')
     rows = cur.fetchall()
     con.close()
-    return  rows
+    return rows
 
 if __name__ == '__main__':
     import uvicorn
