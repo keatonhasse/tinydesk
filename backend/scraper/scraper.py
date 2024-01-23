@@ -25,10 +25,10 @@ def parse_episode(url: str, episode) -> tuple[str, ...]:
     title = episode.find('h2', class_='title').text
     time = episode.find('time')['datetime']
     timestamp = int(datetime.strptime(time, '%Y-%m-%d').timestamp())
-    image = episode.find('img')
+    image = episode.find('img', class_='mleRelated')
     thumbnail = None
     if image:
-        thumbnail = re.search(r'[\w-]+\.(jpg|jpeg|png)', image['src']).group(0)
+        thumbnail = re.search(r'^(.*?)\?.*$', image['src']).group(1)
     episode = (
         fetch_video_id(title),
         url,
@@ -67,6 +67,7 @@ def main() -> None:
 if __name__ == '__main__':
     BAD_PATHS = (
         '/2021/04/23/989905360/tiny-desk-meets-afropunk-chocquibtown-nenny-luedji-luna-calma-carmona',
+        '/2022/02/10/1075624471/alexis-nikole-nelsons-favorite-tiny-desk-concerts',
         '/2015/12/10/459054571/sharon-jones-the-dap-kings-play-one-for-hanukkah',
         '/series/761983313/tiny-desk-playlists',
         '/music'
