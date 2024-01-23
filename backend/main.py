@@ -8,7 +8,7 @@ def get_episodes():
     con = sqlite3.connect('tinydesk.db')
     con.row_factory = sqlite3.Row
     cur = con.cursor()
-    cur.execute('SELECT * FROM episodes LIMIT 5;')
+    cur.execute('SELECT * FROM episodes;')
     rows = cur.fetchall()
     con.close()
     return rows
