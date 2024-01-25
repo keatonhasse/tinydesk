@@ -1,6 +1,15 @@
-#root {
-  margin: 0 auto;
+.search {
+  position: sticky;
+  top: 0;
+}
+
+.container {
   padding: 2rem;
+}
+
+.episode-list {
+  margin: 0;
+  padding: 1rem 0;
 }
 
 .episode-container {
@@ -27,11 +36,35 @@
 }
 
 .media {
-  align-items: center;
-  justify-content: center;
-  height: 25px;
-  width: 25px;
+  align-self: center;
+  height: 50px;
+  width: 50px;
   background-color: #fff;
   border-radius: 50%;
   display: inline-block;
+  margin: 0 1rem 0 auto;
+}
+
+.footer {
+  position: sticky;
+  display: flex;
+  height: 3rem;
+  bottom: 0;
+  background-color: darkgrey;
+  padding: 1rem;
+}
+
+.play-pause {
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.media-s {
+  display: flex;
+  flex-direction: column;
+}
+
+.media-info {
+  display: flex;
+  flex-direction: column;
 }
