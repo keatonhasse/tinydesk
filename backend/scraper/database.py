@@ -1,7 +1,7 @@
 import sqlite3
 
 class Database:
-    def __init__(self, name='tinydesk.db'):
+    def __init__(self, name='../tinydesk.db'):
         self.con = sqlite3.connect(name)
         self.create_tables()
     
@@ -14,7 +14,7 @@ class Database:
                 id TEXT PRIMARY KEY,
                 url TEXT NOT NULL,
                 title TEXT NOT NULL,
-                upload_date TEXT NOT NULL,
+                timestamp INTEGER NOT NULL,
                 thumbnail TEXT
             );
         ''')
